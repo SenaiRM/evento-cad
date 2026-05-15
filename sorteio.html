@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B3C7A" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Sorteio — Feirão de Imóveis 2026</title>
+
+  <style>
+    :root {
+      --azul:       #0B3C7A;
+      --azul-escuro:#072C5E;
+      --amarelo:    #FFD100;
+      --branco:     #ffffff;
+      --cinza-leve: #F4F6FB;
+      --cinza-borda:#DDE2EE;
+      --texto:      #1A2340;
+      --texto-soft: #5A6282;
+      --erro:       #D32F2F;
+      --sucesso:    #1B7A3E;
+      --raio:       14px;
+      --raio-sm:    8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--cinza-leve);
+      color: var(--texto);
+      font-size: 16px;
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--azul);
+      padding: 18px 20px;
+      text-align: center;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .senai-logo { height: 32px; }
+    .header-divider { width:1px; height:28px; background:rgba(255,255,255,.3); }
+    .header h1 { color: var(--branco); font-size: 18px; font-weight: 800; }
+    .header h1 span { color: var(--amarelo); }
+    .header-sub { color: rgba(255,255,255,.7); font-size: 11px; margin-top: 2px; }
+
+    /* ── MAIN ── */
+    .main { max-width: 600px; margin: 24px auto; padding: 0 16px 40px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--branco);
+      border-radius: var(--raio);
+      padding: 24px 20px;
+      box-shadow: 0 2px 16px rgba(11,60,122,.09);
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: var(--azul); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── TELA DE SENHA ── */
+    #tela-senha { }
+    .senha-label { font-size: 13px; font-weight: 600; color: var(--azul-escuro); margin-bottom: 6px; display: block; }
+    .senha-input {
+      width: 100%; padding: 13px 14px; border: 1.5px solid var(--cinza-borda);
+      border-radius: var(--raio-sm); font-size: 16px; margin-bottom: 12px;
+      appearance: none; -webkit-appearance: none;
+    }
+    .senha-input:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px rgba(11,60,122,.12); }
+    .btn-entrar {
+      width: 100%; padding: 14px; background: var(--amarelo); color: var(--azul-escuro);
+      font-size: 15px; font-weight: 800; border: none; border-radius: var(--raio-sm);
+      cursor: pointer; touch-action: manipulation;
+    }
+    .msg-erro-senha { color: var(--erro); font-size: 13px; margin-top: 8px; display: none; }
+
+    /* ── TELA PRINCIPAL ── */
+    #tela-principal { display: none; }
+
+    /* ── SORTEIO ── */
+    .sorteio-box {
+      background: var(--azul);
+      border-radius: var(--raio);
+      padding: 28px 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .sorteio-label {
+      color: var(--amarelo); font-size: 11px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .sorteio-token {
+      color: var(--branco);
+      font-size: clamp(40px, 14vw, 64px);
+      font-weight: 900;
+      letter-spacing: clamp(4px, 2vw, 10px);
+      font-family: 'Courier New', monospace;
+      line-height: 1;
+      min-height: 72px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sorteio-nome {
+      color: rgba(255,255,255,.85);
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 12px;
+      min-height: 22px;
+      transition: opacity .3s;
+    }
+
+    @keyframes pulso {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.04); }
+    }
+    .sorteio-token.animando { animation: pulso .12s ease-in-out infinite; }
+
+    /* ── FILTRO ── */
+    .filtro-sorteio {
+      background: var(--cinza-leve); border-radius: var(--raio-sm);
+      padding: 14px; margin-bottom: 14px;
+    }
+    .filtro-titulo { font-size: 12px; font-weight: 700; color: var(--azul-escuro); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
+    .filtro-opcoes { display: flex; gap: 20px; flex-wrap: wrap; }
+    .filtro-label { display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+    .filtro-label input[type="radio"] { accent-color: var(--azul); width: 16px; height: 16px; }
+    .filtro-contador { font-size: 12px; color: var(--texto-soft); margin-top: 8px; }
+
+    /* ── BOTÃO SORTEAR ── */
+    .btn-sortear {
+      width: 100%; padding: 16px; background: var(--amarelo);
+      color: var(--azul-escuro); font-size: 18px; font-weight: 900;
+      border: none; border-radius: var(--raio-sm); cursor: pointer;
+      letter-spacing: .5px; touch-action: manipulation;
+      transition: transform .1s;
+    }
+    .btn-sortear:active { transform: scale(.98); }
+    .btn-sortear:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── VENCEDOR ── */
+    .vencedor-card {
+      background: linear-gradient(135deg, #1B7A3E, #23a050);
+      border-radius: var(--raio);
+      padding: 20px;
+      text-align: center;
+      margin-top: 16px;
+      display: none;
+    }
+    .vencedor-card.visivel { display: block; }
+    .vencedor-titulo { color: var(--amarelo); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+    .vencedor-nome { color: var(--branco); font-size: 20px; font-weight: 800; }
+    .vencedor-token { color: rgba(255,255,255,.7); font-size: 13px; margin-top: 4px; font-family: monospace; }
+
+    /* ── HISTÓRICO ── */
+    .historico-lista { list-style: none; }
+    .historico-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--cinza-borda);
+      font-size: 14px;
+    }
+    .historico-item:last-child { border-bottom: none; }
+    .historico-num {
+      width: 24px; height: 24px; background: var(--amarelo); color: var(--azul);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; flex-shrink: 0;
+    }
+    .historico-nome { flex: 1; margin: 0 10px; font-weight: 600; }
+    .historico-token { font-family: monospace; color: var(--texto-soft); font-size: 13px; }
+
+    /* ── PARTICIPANTES ── */
+    .stats { display: flex; gap: 12px; margin-bottom: 16px; }
+    .stat-box {
+      flex: 1; background: var(--cinza-leve); border-radius: var(--raio-sm);
+      padding: 12px; text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 800; color: var(--azul); }
+    .stat-label { font-size: 11px; color: var(--texto-soft); margin-top: 2px; }
+
+    .busca {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--cinza-borda);
+      border-radius: var(--raio-sm); font-size: 14px; margin-bottom: 12px;
+      appearance: none; -webkit-appearance: none;
+    }
+    .busca:focus { outline: none; border-color: var(--azul); }
+
+    .tabela-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: var(--azul); color: var(--amarelo);
+      padding: 10px 12px; text-align: left; font-weight: 700;
+      font-size: 11px; letter-spacing: .5px; text-transform: uppercase;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--cinza-borda); }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: var(--cinza-leve); }
+    .token-cell { font-family: monospace; font-weight: 700; color: var(--azul); }
+
+    /* ── FOOTER ── */
+    .footer { text-align: center; font-size: 11px; color: var(--texto-soft); padding: 8px 16px 24px; }
+    .footer strong { color: var(--azul); }
+
+    /* ── LOADING ── */
+    .spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,.4); border-top-color: var(--amarelo);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">
+    <svg class="senai-logo" viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg" aria-label="SENAI">
+      <text x="0" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+            font-size="30" fill="#ffffff" letter-spacing="1">SENA</text>
+      <text x="90" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+            font-size="30" fill="#ffffff">i</text>
+      <circle cx="96" cy="5" r="5" fill="#E8401C"/>
+    </svg>
+    <div class="header-divider"></div>
+    <div style="text-align:left;">
+      <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Curso ADS</div>
+      <div style="color:var(--amarelo);font-size:12px;font-weight:700;line-height:1.2;">Análise e<br>Desenvolvimento</div>
+    </div>
+  </div>
+  <h1>Feirão de Imóveis — <span>Sorteio</span></h1>
+  <p class="header-sub">Anápolis 2026 · Painel do Organizador</p>
+</header>
+
+<main class="main">
+
+  <!-- ══ TELA DE SENHA ══════════════════════════════════ -->
+  <div id="tela-senha">
+    <div class="card">
+      <div class="card-title">🔒 Acesso restrito</div>
+      <label class="senha-label" for="campo-senha">Senha de acesso</label>
+      <input id="campo-senha" type="password" class="senha-input"
+             placeholder="Digite a senha" autocomplete="off" />
+      <button class="btn-entrar" onclick="entrar()">Entrar</button>
+      <div id="erro-senha" class="msg-erro-senha">Senha incorreta.</div>
+    </div>
+  </div>
+
+  <!-- ══ TELA PRINCIPAL ═════════════════════════════════ -->
+  <div id="tela-principal">
+
+    <!-- Estatísticas -->
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-num" id="total-cadastros">—</div>
+        <div class="stat-label">Cadastrados</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="total-sorteios">0</div>
+        <div class="stat-label">Sorteios</div>
+      </div>
+    </div>
+
+    <!-- Sorteio -->
+    <div class="card">
+      <div class="card-title">🎯 Sorteio</div>
+
+      <div class="sorteio-box">
+        <div class="sorteio-label">Token Sorteado</div>
+        <div class="sorteio-token" id="token-display">????????</div>
+        <div class="sorteio-nome" id="nome-display"></div>
+      </div>
+
+      <!-- Seleção: geral ou por dia -->
+      <div class="filtro-sorteio">
+        <div class="filtro-titulo">Participantes do sorteio:</div>
+        <div class="filtro-opcoes">
+          <label class="filtro-label">
+            <input type="radio" name="filtro" value="geral" checked onchange="atualizarFiltro()" />
+            Todos os dias
+          </label>
+          <label class="filtro-label">
+            <input type="radio" name="filtro" value="dia" onchange="atualizarFiltro()" />
+            Por dia específico
+          </label>
+        </div>
+        <div id="seletor-dia" style="display:none; margin-top:10px;">
+          <input type="date" id="campo-dia" class="busca" style="margin-bottom:0;"
+                 onchange="atualizarFiltro()" />
+        </div>
+        <div class="filtro-contador" id="filtro-contador"></div>
+      </div>
+
+      <button class="btn-sortear" id="btn-sortear" onclick="sortear()">
+        🎲 Realizar Sorteio
+      </button>
+
+      <!-- Vencedor destacado -->
+      <div class="vencedor-card" id="vencedor-card">
+        <div class="vencedor-titulo">🏆 Vencedor</div>
+        <div class="vencedor-nome" id="vencedor-nome"></div>
+        <div class="vencedor-token" id="vencedor-token"></div>
+      </div>
+    </div>
+
+    <!-- Histórico de sorteios -->
+    <div class="card" id="card-historico" style="display:none;">
+      <div class="card-title">📋 Histórico de Sorteios</div>
+      <ul class="historico-lista" id="historico-lista"></ul>
+    </div>
+
+    <!-- Lista de participantes -->
+    <div class="card">
+      <div class="card-title">👥 Participantes</div>
+      <input type="search" class="busca" id="busca" placeholder="Buscar por nome ou token…" oninput="filtrar()" />
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Token</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-corpo"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tela-principal -->
+
+</main>
+
+<footer class="footer">
+  Desenvolvido pelo curso de
+  <strong>Análise e Desenvolvimento de Sistemas — ADS · SENAI Anápolis</strong>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────
+//  CONFIGURAÇÃO
+// ─────────────────────────────────────────────────────────
+const GAS_URL       = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT'; // mesma URL do formulário
+const SENHA_ACESSO  = 'senai2026';                        // mesma do codigo.gs (CHAVE_SORTEIO)
+// ─────────────────────────────────────────────────────────
+
+let participantes      = [];   // todos os cadastrados
+let participantesFiltro = [];  // usados no sorteio atual
+let historico          = [];
+
+// ── Autenticação ──────────────────────────────────────────
+
+document.getElementById('campo-senha').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') entrar();
+});
+
+function entrar() {
+  const senha = document.getElementById('campo-senha').value.trim();
+  if (senha !== SENHA_ACESSO) {
+    document.getElementById('erro-senha').style.display = 'block';
+    return;
+  }
+  document.getElementById('tela-senha').style.display    = 'none';
+  document.getElementById('tela-principal').style.display = 'block';
+  carregarParticipantes();
+}
+
+// ── Carregar participantes ────────────────────────────────
+
+async function carregarParticipantes() {
+  try {
+    const url  = GAS_URL + '?action=listar&key=' + SENHA_ACESSO;
+    const resp = await fetch(url);
+    const json = await resp.json();
+
+    if (!json.ok) throw new Error('Falha ao carregar');
+
+    participantes = json.participantes;
+
+    // Pré-seleciona a data de hoje no seletor de dia
+    const hoje = new Date().toISOString().slice(0, 10);
+    document.getElementById('campo-dia').value = hoje;
+
+    document.getElementById('total-cadastros').textContent = participantes.length;
+    atualizarFiltro();
+    renderizarTabela(participantes);
+
+  } catch (err) {
+    document.getElementById('total-cadastros').textContent = '!';
+    console.error(err);
+  }
+}
+
+// ── Filtro geral / por dia ────────────────────────────────
+
+function atualizarFiltro() {
+  const modo = document.querySelector('input[name="filtro"]:checked').value;
+  const seletorDia = document.getElementById('seletor-dia');
+
+  seletorDia.style.display = modo === 'dia' ? 'block' : 'none';
+
+  if (modo === 'geral') {
+    participantesFiltro = participantes.slice();
+  } else {
+    const diaSelecionado = document.getElementById('campo-dia').value; // yyyy-mm-dd
+    if (!diaSelecionado) { participantesFiltro = participantes.slice(); }
+    else {
+      // data gravada como dd/MM/yyyy HH:mm:ss — converte para comparar
+      const [ano, mes, dia] = diaSelecionado.split('-');
+      const prefixo = dia + '/' + mes + '/' + ano;
+      participantesFiltro = participantes.filter(function(p) {
+        return p.data && p.data.startsWith(prefixo);
+      });
+    }
+  }
+
+  const contador = document.getElementById('filtro-contador');
+  contador.textContent = participantesFiltro.length + ' participante(s) elegível(is) para este sorteio.';
+}
+
+// ── Tabela de participantes ───────────────────────────────
+
+function renderizarTabela(lista) {
+  const corpo = document.getElementById('tabela-corpo');
+  corpo.innerHTML = lista.map(function(p, i) {
+    return '<tr>'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td>' + escapeHtml(p.nome) + '</td>'
+      + '<td class="token-cell">' + p.token + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function filtrar() {
+  const termo = document.getElementById('busca').value.toLowerCase();
+  const filtrado = participantes.filter(function(p) {
+    return p.nome.toLowerCase().includes(termo) || p.token.includes(termo);
+  });
+  renderizarTabela(filtrado);
+}
+
+// ── Sorteio ───────────────────────────────────────────────
+
+function sortear() {
+  if (participantesFiltro.length === 0) {
+    alert('Nenhum participante elegível para este sorteio.');
+    return;
+  }
+
+  const btn         = document.getElementById('btn-sortear');
+  const tokenEl     = document.getElementById('token-display');
+  const nomeEl      = document.getElementById('nome-display');
+  const vencedorCard= document.getElementById('vencedor-card');
+
+  btn.disabled = true;
+  vencedorCard.classList.remove('visivel');
+  nomeEl.textContent = '';
+  tokenEl.classList.add('animando');
+
+  // Animação: troca tokens aleatórios por ~2.5s
+  let ticks  = 0;
+  const total = 40;
+  const intervalo = setInterval(function() {
+    const idx   = Math.floor(Math.random() * participantesFiltro.length);
+    tokenEl.textContent = participantesFiltro[idx].token;
+    ticks++;
+
+    if (ticks >= total) {
+      clearInterval(intervalo);
+
+      // Escolhe o vencedor real
+      const vencedor = participantes[Math.floor(Math.random() * participantesFiltro.length)];
+      tokenEl.classList.remove('animando');
+      tokenEl.textContent  = vencedor.token;
+      nomeEl.textContent   = vencedor.nome;
+
+      // Destaque de vencedor
+      document.getElementById('vencedor-nome').textContent  = vencedor.nome;
+      document.getElementById('vencedor-token').textContent = 'Token: ' + vencedor.token;
+      vencedorCard.classList.add('visivel');
+
+      // Histórico
+      historico.unshift(vencedor);
+      document.getElementById('total-sorteios').textContent = historico.length;
+      renderizarHistorico();
+
+      btn.disabled = false;
+    }
+  }, 60);
+}
+
+// ── Histórico ─────────────────────────────────────────────
+
+function renderizarHistorico() {
+  const card  = document.getElementById('card-historico');
+  const lista = document.getElementById('historico-lista');
+
+  card.style.display = 'block';
+  lista.innerHTML = historico.map(function(p, i) {
+    return '<li class="historico-item">'
+      + '<div class="historico-num">' + (i + 1) + '</div>'
+      + '<div class="historico-nome">' + escapeHtml(p.nome) + '</div>'
+      + '<div class="historico-token">' + p.token + '</div>'
+      + '</li>';
+  }).join('');
+}
+
+// ── Helpers ───────────────────────────────────────────────
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+</script>
+
+</body>
+</html>

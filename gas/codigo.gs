@@ -69,8 +69,21 @@ function doPost(e) {
   }
 }
 
-// Permite testar se o script está ativo via GET
-function doGet() {
+// ── Chave de acesso para a página de sorteio ──────────────
+const CHAVE_SORTEIO = 'senai2026'; // troque por uma senha de sua escolha
+
+function doGet(e) {
+  const params = e && e.parameter ? e.parameter : {};
+
+  if (params.action === 'listar' && params.key === CHAVE_SORTEIO) {
+    const aba  = obterOuCriarAba();
+    const rows = aba.getDataRange().getValues();
+    const participantes = rows.slice(1).map(function(r) {
+      return { nome: r[1], token: String(r[5]), data: String(r[6]) };
+    }).filter(function(p) { return p.token; });
+    return resposta({ ok: true, participantes: participantes });
+  }
+
   return resposta({ status: 'online', evento: NOME_EVENTO });
 }
 
