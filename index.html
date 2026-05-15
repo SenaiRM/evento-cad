@@ -70,10 +70,7 @@
     }
 
     /* Logo SENAI inline SVG */
-    .senai-logo {
-      height: 36px;
-      filter: brightness(0) invert(1);
-    }
+    .senai-logo { height: 36px; }
 
     .header-divider {
       width: 1px;
@@ -522,7 +519,13 @@
 ═══════════════════════════════════════════════════ -->
 <header class="header">
   <div class="logo-wrap">
-    <img src="assets/senai-logo.png" class="senai-logo" alt="SENAI" />
+    <svg class="senai-logo" viewBox="0 0 130 40" xmlns="http://www.w3.org/2000/svg" aria-label="SENAI">
+      <text x="0" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+            font-size="30" fill="#ffffff" letter-spacing="1">SENA</text>
+      <text x="90" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+            font-size="30" fill="#ffffff">i</text>
+      <circle cx="96" cy="5" r="5" fill="#E8401C"/>
+    </svg>
     <div class="header-divider"></div>
     <div style="text-align:left;">
       <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Curso ADS</div>
@@ -787,11 +790,15 @@ document.getElementById('form-cadastro').addEventListener('submit', async functi
 
     const json = await resp.json();
 
-    if (!json.ok) {
-      throw new Error(json.mensagem || 'Erro desconhecido.');
+    if (!json.ok && json.duplicado) {
+      const av = document.getElementById('aviso-form');
+      av.textContent = 'Este CPF já está cadastrado. Seu token é: ' + json.token;
+      av.className   = 'aviso erro';
+      return;
     }
 
-    // Sucesso
+    if (!json.ok) throw new Error(json.mensagem || 'Erro desconhecido.');
+
     const agora = new Date().toLocaleDateString('pt-BR', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',

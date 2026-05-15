@@ -35,11 +35,21 @@ function doPost(e) {
     }
 
     const planilha = obterOuCriarAba();
-    const token    = gerarTokenUnico(planilha);
-    const agora    = new Date();
+    const cpfLimpo = cpf.replace(/\D/g, '');
+
+    // Bloqueia CPF duplicado — retorna o token já gerado
+    const tokenExistente = buscarTokenPorCpf(planilha, cpfLimpo);
+    if (tokenExistente) {
+      lock.releaseLock();
+      return resposta({ ok: false, duplicado: true, token: tokenExistente,
+                        mensagem: 'Este CPF já está cadastrado.' });
+    }
+
+    const token = gerarTokenUnico(planilha);
+    const agora = new Date();
 
     planilha.appendRow([
-      planilha.getLastRow(),           // ID sequencial
+      planilha.getLastRow(),
       nome.trim(),
       email.trim().toLowerCase(),
       telefone.trim(),
@@ -48,8 +58,6 @@ function doPost(e) {
       Utilities.formatDate(agora, 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss'),
       dados.ip || '',
     ]);
-
-    enviarEmailConfirmacao(email, nome, token, cpf);
 
     lock.releaseLock();
     return resposta({ ok: true, token, nome });
@@ -88,6 +96,16 @@ function obterOuCriarAba() {
 
 // --------------- Token ---------------
 
+function buscarTokenPorCpf(aba, cpfLimpo) {
+  const dados = aba.getDataRange().getValues();
+  for (var i = 1; i < dados.length; i++) {
+    if (String(dados[i][4]).replace(/\D/g, '') === cpfLimpo) {
+      return String(dados[i][5]); // retorna o token existente
+    }
+  }
+  return null;
+}
+
 function gerarTokenUnico(aba) {
   const dados  = aba.getDataRange().getValues();
   const tokens = new Set(dados.slice(1).map(function(linha) { return linha[5]; }));
@@ -101,38 +119,6 @@ function gerarTokenUnico(aba) {
 }
 
 // --------------- E-mail ---------------
-
-function enviarEmailConfirmacao(para, nome, token, cpf) {
-  const cpfMascarado = mascararCpf(cpf);
-
-  const html = '<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;border-radius:10px;overflow:hidden;border:1px solid #ddd;">'
-    + '<div style="background:#0B3C7A;padding:24px 28px;text-align:center;">'
-    +   '<div style="color:#FFD100;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">SENAI · ADS Anápolis</div>'
-    +   '<h1 style="color:#FFD100;margin:0;font-size:20px;line-height:1.3;">' + NOME_EVENTO + '</h1>'
-    +   '<p style="color:#cce0ff;margin:6px 0 0;font-size:12px;">' + DATA_EVENTO + '</p>'
-    + '</div>'
-    + '<div style="background:#fff;padding:24px 28px;">'
-    +   '<p style="font-size:15px;color:#222;">Olá, <strong>' + nome + '</strong>!</p>'
-    +   '<p style="font-size:14px;color:#555;line-height:1.6;">Seu cadastro foi concluído. Guarde este e-mail — ele contém o seu número para o sorteio.</p>'
-    +   '<div style="background:#0B3C7A;border-radius:10px;padding:22px;text-align:center;margin:20px 0;">'
-    +     '<div style="color:#FFD100;font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;">TOKEN DO SORTEIO</div>'
-    +     '<div style="color:#fff;font-size:44px;font-weight:700;letter-spacing:8px;font-family:\'Courier New\',monospace;">' + token + '</div>'
-    +   '</div>'
-    +   '<table style="width:100%;font-size:13px;color:#444;border-collapse:collapse;">'
-    +     '<tr><td style="padding:4px 0;width:60px;color:#888;">Nome:</td><td style="padding:4px 0;font-weight:600;">' + nome + '</td></tr>'
-    +     '<tr><td style="padding:4px 0;color:#888;">CPF:</td><td style="padding:4px 0;">' + cpfMascarado + '</td></tr>'
-    +   '</table>'
-    +   '<div style="background:#fffbea;border-left:4px solid #FFD100;padding:12px 16px;border-radius:0 6px 6px 0;margin-top:20px;font-size:13px;color:#5a4800;line-height:1.6;">'
-    +     '📋 <strong>Como participar do sorteio:</strong><br>Deposite seu cupom impresso em uma das urnas localizadas no interior do evento e concorra a brindes!'
-    +   '</div>'
-    + '</div>'
-    + '<div style="background:#f5f5f5;padding:14px;text-align:center;font-size:11px;color:#999;">'
-    +   'Desenvolvido pelo curso de <strong style="color:#0B3C7A;">Análise e Desenvolvimento de Sistemas — ADS · SENAI Anápolis</strong>'
-    + '</div>'
-    + '</div>';
-
-  MailApp.sendEmail({ to: para, subject: ASSUNTO_EMAIL, htmlBody: html });
-}
 
 function mascararCpf(cpf) {
   var digitos = cpf.replace(/\D/g, '');
