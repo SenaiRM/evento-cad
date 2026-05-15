@@ -14,10 +14,9 @@
 //  4. Copie a URL gerada e cole em index.html (variável GAS_URL)
 // ============================================================
 
-const NOME_ABA       = 'Participantes';
-const ASSUNTO_EMAIL  = 'Seu cupom — Feirão de Imóveis e Oportunidades Anápolis 2026';
-const NOME_EVENTO    = 'Feirão de Imóveis e Oportunidades Anápolis 2026';
-const DATA_EVENTO    = '21 a 23 de maio · Praça Dom Emanuel · 10h às 20h';
+const NOME_ABA      = 'Participantes';
+const NOME_EVENTO   = 'Feirão de Imóveis e Oportunidades Anápolis 2026';
+const CHAVE_SORTEIO = 'senai2026';
 
 // --------------- Ponto de entrada (POST) ---------------
 
@@ -27,6 +26,23 @@ function doPost(e) {
 
   try {
     const dados = JSON.parse(e.postData.contents);
+
+    // Ação: listar participantes (chamada da página de sorteio)
+    if (dados.action === 'listar') {
+      if (dados.key !== CHAVE_SORTEIO) {
+        lock.releaseLock();
+        return resposta({ ok: false, mensagem: 'Acesso negado.' });
+      }
+      const aba  = obterOuCriarAba();
+      const rows = aba.getDataRange().getValues();
+      const participantes = rows.slice(1).map(function(r) {
+        return { nome: r[1], token: String(r[5]), data: String(r[6]) };
+      }).filter(function(p) { return p.token; });
+      lock.releaseLock();
+      return resposta({ ok: true, participantes: participantes });
+    }
+
+    // Ação padrão: cadastro
     const { nome, email, telefone, cpf } = dados;
 
     if (!nome || !email || !telefone || !cpf) {
@@ -37,7 +53,6 @@ function doPost(e) {
     const planilha = obterOuCriarAba();
     const cpfLimpo = cpf.replace(/\D/g, '');
 
-    // Bloqueia CPF duplicado — retorna o token já gerado
     const tokenExistente = buscarTokenPorCpf(planilha, cpfLimpo);
     if (tokenExistente) {
       lock.releaseLock();
@@ -69,21 +84,7 @@ function doPost(e) {
   }
 }
 
-// ── Chave de acesso para a página de sorteio ──────────────
-const CHAVE_SORTEIO = 'senai2026'; // troque por uma senha de sua escolha
-
 function doGet(e) {
-  const params = e && e.parameter ? e.parameter : {};
-
-  if (params.action === 'listar' && params.key === CHAVE_SORTEIO) {
-    const aba  = obterOuCriarAba();
-    const rows = aba.getDataRange().getValues();
-    const participantes = rows.slice(1).map(function(r) {
-      return { nome: r[1], token: String(r[5]), data: String(r[6]) };
-    }).filter(function(p) { return p.token; });
-    return resposta({ ok: true, participantes: participantes });
-  }
-
   return resposta({ status: 'online', evento: NOME_EVENTO });
 }
 
@@ -113,7 +114,7 @@ function buscarTokenPorCpf(aba, cpfLimpo) {
   const dados = aba.getDataRange().getValues();
   for (var i = 1; i < dados.length; i++) {
     if (String(dados[i][4]).replace(/\D/g, '') === cpfLimpo) {
-      return String(dados[i][5]); // retorna o token existente
+      return String(dados[i][5]);
     }
   }
   return null;
@@ -129,16 +130,6 @@ function gerarTokenUnico(aba) {
   }
 
   throw new Error('Não foi possível gerar token único após 30 tentativas.');
-}
-
-// --------------- E-mail ---------------
-
-function mascararCpf(cpf) {
-  var digitos = cpf.replace(/\D/g, '');
-  if (digitos.length === 11) {
-    return '***.' + digitos.substring(3, 6) + '.' + digitos.substring(6, 9) + '-**';
-  }
-  return cpf;
 }
 
 // --------------- Helpers ---------------

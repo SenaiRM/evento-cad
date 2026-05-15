@@ -376,8 +376,10 @@ function entrar() {
 
 async function carregarParticipantes() {
   try {
-    const url  = GAS_URL + '?action=listar&key=' + SENHA_ACESSO;
-    const resp = await fetch(url);
+    const resp = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'listar', key: SENHA_ACESSO }),
+    });
     const json = await resp.json();
 
     if (!json.ok) throw new Error('Falha ao carregar');
