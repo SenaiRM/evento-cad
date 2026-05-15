@@ -344,6 +344,22 @@
       touch-action: manipulation;
     }
 
+    .btn-email {
+      width: 100%;
+      padding: 14px;
+      background: #1B7A3E;
+      color: var(--branco);
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--raio-sm);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: opacity .2s;
+    }
+
+    .btn-email:disabled { opacity: .6; cursor: not-allowed; }
+
     .btn-novo {
       width: 100%;
       padding: 13px;
@@ -356,6 +372,17 @@
       cursor: pointer;
       touch-action: manipulation;
     }
+
+    .aviso-email {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: var(--raio-sm);
+      display: none;
+      margin-top: 4px;
+    }
+
+    .aviso-email.ok  { background:#F0FAF4; border-left:4px solid var(--sucesso); color:#0F4022; display:block; }
+    .aviso-email.err { background:#FFF0F0; border-left:4px solid var(--erro);    color:#7A1A1A; display:block; }
 
     /* ── FOOTER ───────────────────────────────────────── */
     .footer {
@@ -634,6 +661,8 @@
 
       <div class="btns-comprovante">
         <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir cupom</button>
+        <button class="btn-email" id="btn-email" onclick="enviarEmail()">📧 Enviar token por e-mail</button>
+        <div class="aviso-email" id="aviso-email"></div>
         <button class="btn-novo" onclick="novoCadastro()">+ Novo cadastro</button>
       </div>
     </div>
@@ -839,6 +868,47 @@ function exibirComprovante(d) {
   document.getElementById('tela-comprovante').style.display = 'block';
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Enviar e-mail ─────────────────────────────────────────
+
+async function enviarEmail() {
+  const btn = document.getElementById('btn-email');
+  const av  = document.getElementById('aviso-email');
+
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span>Enviando...';
+  av.className  = 'aviso-email';
+
+  try {
+    const resp = await fetch(GAS_URL, {
+      method: 'POST',
+      body:   JSON.stringify({
+        action:   'email',
+        nome:     dadosParticipante.nome,
+        email:    dadosParticipante.email,
+        cpf:      dadosParticipante.cpf,
+        token:    dadosParticipante.token,
+      }),
+    });
+
+    const json = await resp.json();
+
+    if (json.ok) {
+      av.textContent = '✅ E-mail enviado para ' + dadosParticipante.email;
+      av.className   = 'aviso-email ok';
+      btn.disabled   = true;
+      btn.innerHTML  = '📧 E-mail enviado';
+    } else {
+      throw new Error(json.mensagem || 'Falha no envio.');
+    }
+  } catch (err) {
+    av.textContent = '❌ Não foi possível enviar. Tente novamente.';
+    av.className   = 'aviso-email err';
+    btn.disabled   = false;
+    btn.innerHTML  = '📧 Enviar token por e-mail';
+    console.error(err);
+  }
 }
 
 // ── Novo cadastro ─────────────────────────────────────────

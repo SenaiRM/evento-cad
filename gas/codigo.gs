@@ -27,6 +27,18 @@ function doPost(e) {
   try {
     const dados = JSON.parse(e.postData.contents);
 
+    // Ação: enviar e-mail com token
+    if (dados.action === 'email') {
+      const { nome, email, cpf, token } = dados;
+      if (!nome || !email || !token) {
+        lock.releaseLock();
+        return resposta({ ok: false, mensagem: 'Dados insuficientes para envio.' });
+      }
+      enviarEmail(nome, email, cpf, token);
+      lock.releaseLock();
+      return resposta({ ok: true });
+    }
+
     // Ação: listar participantes (chamada da página de sorteio)
     if (dados.action === 'listar') {
       if (dados.key !== CHAVE_SORTEIO) {
@@ -130,6 +142,42 @@ function gerarTokenUnico(aba) {
   }
 
   throw new Error('Não foi possível gerar token único após 30 tentativas.');
+}
+
+// --------------- E-mail ---------------
+
+function enviarEmail(nome, email, cpf, token) {
+  var cpfMask = String(cpf).replace(/\D/g, '');
+  if (cpfMask.length === 11) {
+    cpfMask = '***.' + cpfMask.substring(3,6) + '.' + cpfMask.substring(6,9) + '-**';
+  }
+
+  var corpo = '<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">'
+    + '<div style="background:#0B3C7A;padding:24px;text-align:center;">'
+    + '<h2 style="color:#FFD100;margin:0 0 4px;">Feirão de Imóveis e Oportunidades</h2>'
+    + '<p style="color:#fff;margin:0;font-size:13px;">Anápolis 2026 · 21 a 23 de maio · Praça Dom Emanuel</p>'
+    + '</div>'
+    + '<div style="padding:24px;background:#fff;">'
+    + '<p style="font-size:15px;">Olá, <strong>' + nome + '</strong>!</p>'
+    + '<p style="color:#555;font-size:14px;">Seu token de sorteio está abaixo. Guarde-o!</p>'
+    + '<div style="background:#0B3C7A;border-radius:10px;padding:24px;text-align:center;margin:20px 0;">'
+    + '<div style="color:#FFD100;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Seu Token de Sorteio</div>'
+    + '<div style="color:#fff;font-size:42px;font-weight:700;letter-spacing:6px;font-family:\'Courier New\',monospace;">' + token + '</div>'
+    + '</div>'
+    + '<p style="font-size:13px;color:#666;">CPF: <strong>' + cpfMask + '</strong></p>'
+    + '<div style="background:#fffbea;border-left:4px solid #FFD100;padding:12px 16px;font-size:13px;color:#5a4a00;">'
+    + '<strong>Como participar:</strong> Deposite seu cupom impresso em uma das urnas no evento e concorra a brindes.'
+    + '</div>'
+    + '</div>'
+    + '<div style="background:#f8f9fa;padding:12px;text-align:center;font-size:11px;color:#999;">'
+    + 'Desenvolvido pelo curso de <strong style="color:#0B3C7A;">ADS · SENAI Anápolis</strong>'
+    + '</div>'
+    + '</div>';
+
+  GmailApp.sendEmail(email, 'Seu token — Feirão de Imóveis Anápolis 2026', '', {
+    htmlBody: corpo,
+    name:     'Feirão de Imóveis 2026',
+  });
 }
 
 // --------------- Helpers ---------------
