@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B3C7A" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Feirão de Imóveis — Cadastro</title>
+
+  <style>
+    /* ── CONFIGURAÇÃO DE CORES ────────────────────────── */
+    :root {
+      --azul:       #0B3C7A;
+      --azul-escuro:#072C5E;
+      --amarelo:    #FFD100;
+      --amarelo-bg: #FFF9D6;
+      --branco:     #ffffff;
+      --cinza-leve: #F4F6FB;
+      --cinza-borda:#DDE2EE;
+      --texto:      #1A2340;
+      --texto-soft: #5A6282;
+      --erro:       #D32F2F;
+      --sucesso:    #1B7A3E;
+      --raio:       14px;
+      --raio-sm:    8px;
+    }
+
+    /* ── RESET / BASE ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--cinza-leve);
+      color: var(--texto);
+      font-size: 16px;
+      line-height: 1.5;
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ───────────────────────────────────────── */
+    .header {
+      background: var(--azul);
+      padding: 20px 20px 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::after {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 4px;
+      background: var(--amarelo);
+      border-radius: 2px;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    /* Logo SENAI inline SVG */
+    .senai-logo { height: 36px; }
+
+    .header-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(255,255,255,.3);
+    }
+
+    .evento-badge {
+      display: inline-block;
+      background: var(--amarelo);
+      color: var(--azul);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+    }
+
+    .header h1 {
+      color: var(--branco);
+      font-size: clamp(17px, 5vw, 22px);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+
+    .header h1 span { color: var(--amarelo); }
+
+    .header-sub {
+      color: rgba(255,255,255,.75);
+      font-size: 12px;
+      letter-spacing: .3px;
+    }
+
+    /* ── MAIN WRAPPER ─────────────────────────────────── */
+    .main {
+      max-width: 480px;
+      margin: 30px auto 0;
+      padding: 0 16px 40px;
+    }
+
+    /* ── CARD ─────────────────────────────────────────── */
+    .card {
+      background: var(--branco);
+      border-radius: var(--raio);
+      padding: 24px 20px;
+      box-shadow: 0 2px 16px rgba(11,60,122,.09);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--azul);
+      margin-bottom: 4px;
+    }
+
+    .card-sub {
+      font-size: 13px;
+      color: var(--texto-soft);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* ── FORMULÁRIO ───────────────────────────────────── */
+    .campo {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--azul-escuro);
+      margin-bottom: 5px;
+    }
+
+    label .obrig {
+      color: var(--erro);
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1.5px solid var(--cinza-borda);
+      border-radius: var(--raio-sm);
+      font-size: 16px;             /* evita zoom no iOS */
+      color: var(--texto);
+      background: var(--branco);
+      transition: border-color .18s, box-shadow .18s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--azul);
+      box-shadow: 0 0 0 3px rgba(11,60,122,.12);
+    }
+
+    input.erro {
+      border-color: var(--erro);
+      box-shadow: 0 0 0 3px rgba(211,47,47,.1);
+    }
+
+    .msg-erro {
+      font-size: 12px;
+      color: var(--erro);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .msg-erro.visivel { display: block; }
+
+    /* ── LGPD ─────────────────────────────────────────── */
+    .lgpd {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 4px 0 20px;
+    }
+
+    .lgpd input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      margin-top: 1px;
+      accent-color: var(--azul);
+      cursor: pointer;
+    }
+
+    .lgpd-texto {
+      font-size: 12px;
+      color: var(--texto-soft);
+      line-height: 1.5;
+    }
+
+    /* ── BOTÃO SUBMIT ─────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--amarelo);
+      color: var(--azul-escuro);
+      font-size: 16px;
+      font-weight: 800;
+      border: none;
+      border-radius: var(--raio-sm);
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: opacity .2s, transform .1s;
+      touch-action: manipulation;
+    }
+
+    .btn-submit:active { transform: scale(.98); }
+    .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* ── LOADING ──────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--azul);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── AVISO GERAL ──────────────────────────────────── */
+    .aviso {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--raio-sm);
+      font-size: 13px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .aviso.erro   { background: #FFF0F0; border-left: 4px solid var(--erro);   color: #7A1A1A; display: block; }
+    .aviso.ok     { background: #F0FAF4; border-left: 4px solid var(--sucesso); color: #0F4022; display: block; }
+
+    /* ── TELA DE COMPROVANTE ──────────────────────────── */
+    #tela-comprovante { display: none; }
+
+    .token-box {
+      background: var(--azul);
+      border-radius: var(--raio);
+      padding: 24px 16px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .token-label {
+      color: var(--amarelo);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .token-numero {
+      color: var(--branco);
+      font-size: clamp(36px, 12vw, 52px);
+      font-weight: 900;
+      letter-spacing: clamp(4px, 2vw, 8px);
+      font-family: 'Courier New', 'Courier', monospace;
+      line-height: 1;
+    }
+
+    .info-participante {
+      background: var(--cinza-leve);
+      border-radius: var(--raio-sm);
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--texto-soft);
+      margin-bottom: 16px;
+    }
+
+    .info-participante strong { color: var(--texto); }
+
+    .info-linha {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--cinza-borda);
+    }
+
+    .info-linha:last-child { border-bottom: none; }
+
+    .instrucao {
+      background: var(--amarelo-bg);
+      border-left: 4px solid var(--amarelo);
+      border-radius: 0 var(--raio-sm) var(--raio-sm) 0;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #5A4800;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* ── BOTÕES DO COMPROVANTE ────────────────────────── */
+    .btns-comprovante {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-imprimir {
+      width: 100%;
+      padding: 14px;
+      background: var(--azul);
+      color: var(--branco);
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--raio-sm);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .btn-novo {
+      width: 100%;
+      padding: 13px;
+      background: transparent;
+      color: var(--azul);
+      font-size: 15px;
+      font-weight: 600;
+      border: 1.5px solid var(--azul);
+      border-radius: var(--raio-sm);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: var(--texto-soft);
+      padding: 24px 16px 8px;
+      line-height: 1.6;
+    }
+
+    .footer strong { color: var(--azul); }
+
+    /* ══════════════════════════════════════════════════
+       CUPOM DE IMPRESSÃO — só aparece ao imprimir
+    ══════════════════════════════════════════════════ */
+    #cupom-print { display: none; }
+
+    @media print {
+      /* Esconde tudo */
+      body > *                      { display: none !important; }
+
+      /* Mostra só o cupom */
+      #cupom-print                  { display: block !important; }
+
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
+      /* Layout do cupom impresso */
+      #cupom-print {
+        width: 100%;
+        max-width: 80mm;          /* compatível com térmica de 80mm */
+        margin: 0 auto;
+        font-family: Arial, sans-serif;
+        border: 2px dashed #555;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .cp-header {
+        background: #0B3C7A !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        padding: 14px 12px;
+        text-align: center;
+      }
+
+      .cp-evento {
+        color: #FFD100 !important;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-bottom: 3px;
+      }
+
+      .cp-data {
+        color: #cce0ff !important;
+        font-size: 10px;
+      }
+
+      .cp-body {
+        padding: 14px 12px;
+        text-align: center;
+        background: #fff !important;
+      }
+
+      .cp-token-label {
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #666;
+        margin-bottom: 6px;
+      }
+
+      .cp-token {
+        font-size: 38px;
+        font-weight: 900;
+        letter-spacing: 6px;
+        font-family: 'Courier New', monospace;
+        color: #0B3C7A !important;
+        border: 2px solid #0B3C7A;
+        border-radius: 6px;
+        padding: 6px 10px;
+        display: inline-block;
+        margin-bottom: 10px;
+      }
+
+      .cp-info {
+        font-size: 11px;
+        color: #333;
+        text-align: left;
+        border-top: 1px dashed #ccc;
+        padding-top: 8px;
+      }
+
+      .cp-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+      }
+
+      .cp-info-key { color: #888; }
+
+      .cp-instrucao {
+        font-size: 10px;
+        color: #444;
+        border-top: 1px dashed #ccc;
+        margin-top: 8px;
+        padding-top: 8px;
+        text-align: center;
+        line-height: 1.5;
+      }
+
+      .cp-footer {
+        background: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        padding: 8px;
+        text-align: center;
+        font-size: 9px;
+        color: #888;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     CUPOM — visível apenas ao imprimir
+═══════════════════════════════════════════════════ -->
+<div id="cupom-print">
+  <div class="cp-header">
+    <div class="cp-evento">Feirão de Imóveis e Oportunidades<br>Anápolis 2026</div>
+    <div class="cp-data">21 a 23 de maio · Praça Dom Emanuel · 10h às 20h</div>
+  </div>
+  <div class="cp-body">
+    <div class="cp-token-label">Token do Sorteio</div>
+    <div class="cp-token" id="cp-token">00000000</div>
+    <div class="cp-info">
+      <div class="cp-info-row">
+        <span class="cp-info-key">Nome:</span>
+        <span id="cp-nome">—</span>
+      </div>
+      <div class="cp-info-row">
+        <span class="cp-info-key">CPF:</span>
+        <span id="cp-cpf">—</span>
+      </div>
+      <div class="cp-info-row">
+        <span class="cp-info-key">Data:</span>
+        <span id="cp-data">—</span>
+      </div>
+    </div>
+    <div class="cp-instrucao">
+      Deposite este cupom em uma das urnas<br>
+      no interior do evento e concorra a brindes!
+    </div>
+  </div>
+  <div class="cp-footer">
+    Desenvolvido pelo curso de ADS · SENAI Anápolis
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="logo-wrap">
+    <!-- Logo SENAI (SVG inline — substitua por <img src="assets/senai-logo.png"> se preferir) -->
+    <svg class="senai-logo" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" aria-label="SENAI">
+      <text x="0" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+            font-size="30" fill="#ffffff" letter-spacing="1">SENA</text>
+      <text x="90" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+            font-size="30" fill="#ffffff">i</text>
+      <!-- ponto laranja acima do i -->
+      <circle cx="96" cy="5" r="5" fill="#E8401C"/>
+    </svg>
+    <div class="header-divider"></div>
+    <div style="text-align:left;">
+      <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Curso ADS</div>
+      <div style="color:var(--amarelo);font-size:12px;font-weight:700;line-height:1.2;">Análise e<br>Desenvolvimento</div>
+    </div>
+  </div>
+
+  <div class="evento-badge">Sorteio · Feirão 2026</div>
+  <h1>Feirão de Imóveis e<br><span>Oportunidades Anápolis</span></h1>
+  <p class="header-sub">21 a 23 de maio · Praça Dom Emanuel · 10h às 20h</p>
+</header>
+
+<!-- ═══════════════════════════════════════════════════
+     CONTEÚDO PRINCIPAL
+═══════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ── TELA 1: FORMULÁRIO ─────────────────────────── -->
+  <div id="tela-formulario">
+    <div class="card">
+      <h2 class="card-title">Cadastro para Sorteio</h2>
+      <p class="card-sub">Preencha seus dados e receba seu token de participação. Entrada gratuita!</p>
+
+      <form id="form-cadastro" novalidate>
+
+        <div class="campo">
+          <label for="nome">Nome completo <span class="obrig">*</span></label>
+          <input id="nome" name="nome" type="text" placeholder="Seu nome completo"
+                 autocomplete="name" autocapitalize="words" inputmode="text" />
+          <div class="msg-erro" id="erro-nome">Informe o nome completo.</div>
+        </div>
+
+        <div class="campo">
+          <label for="email">E-mail <span class="obrig">*</span></label>
+          <input id="email" name="email" type="email" placeholder="seu@email.com"
+                 autocomplete="email" inputmode="email" />
+          <div class="msg-erro" id="erro-email">Informe um e-mail válido.</div>
+        </div>
+
+        <div class="campo">
+          <label for="telefone">WhatsApp <span class="obrig">*</span></label>
+          <input id="telefone" name="telefone" type="tel" placeholder="(62) 99999-9999"
+                 autocomplete="tel" inputmode="tel" maxlength="15" />
+          <div class="msg-erro" id="erro-telefone">Informe o número com DDD.</div>
+        </div>
+
+        <div class="campo">
+          <label for="cpf">CPF <span class="obrig">*</span></label>
+          <input id="cpf" name="cpf" type="text" placeholder="000.000.000-00"
+                 inputmode="numeric" maxlength="14" />
+          <div class="msg-erro" id="erro-cpf">CPF inválido.</div>
+        </div>
+
+        <div class="lgpd">
+          <input type="checkbox" id="lgpd" name="lgpd" />
+          <label for="lgpd" class="lgpd-texto" style="font-weight:400;">
+            Autorizo o uso dos meus dados pessoais para participação no sorteio deste evento,
+            conforme a Lei Geral de Proteção de Dados (LGPD).
+          </label>
+        </div>
+
+        <div id="aviso-form" class="aviso"></div>
+
+        <button type="submit" class="btn-submit" id="btn-submit">
+          Gerar meu token
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ── TELA 2: COMPROVANTE ────────────────────────── -->
+  <div id="tela-comprovante">
+    <div class="card">
+      <div style="text-align:center;margin-bottom:4px;">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="24" fill="#1B7A3E"/>
+          <path d="M14 24l7 7 13-14" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="card-title" style="text-align:center;">Cadastro realizado!</h2>
+      <p class="card-sub" style="text-align:center;">Seu token de sorteio está abaixo. Imprima ou anote!</p>
+
+      <div class="token-box">
+        <div class="token-label">Token do Sorteio</div>
+        <div class="token-numero" id="token-display">00000000</div>
+      </div>
+
+      <div class="info-participante">
+        <div class="info-linha">
+          <span>Nome</span>
+          <strong id="info-nome">—</strong>
+        </div>
+        <div class="info-linha">
+          <span>CPF</span>
+          <strong id="info-cpf">—</strong>
+        </div>
+        <div class="info-linha">
+          <span>Data</span>
+          <strong id="info-data">—</strong>
+        </div>
+      </div>
+
+      <div class="instrucao">
+        📋 Deposite seu cupom impresso em uma das urnas localizadas no interior do evento e concorra a brindes!
+      </div>
+
+      <div class="btns-comprovante">
+        <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir cupom</button>
+        <button class="btn-novo" onclick="novoCadastro()">+ Novo cadastro</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  Desenvolvido pelo curso de<br>
+  <strong>Análise e Desenvolvimento de Sistemas — ADS · SENAI Anápolis</strong>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────────────────────
+//  CONFIGURAÇÃO — preencha após implantar o Apps Script
+// ─────────────────────────────────────────────────────────
+const GAS_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+// ─────────────────────────────────────────────────────────
+
+// Estado atual do participante (preenchido após cadastro)
+let dadosParticipante = {};
+
+// ── Máscaras ─────────────────────────────────────────────
+
+const campoTelefone = document.getElementById('telefone');
+campoTelefone.addEventListener('input', function () {
+  let v = this.value.replace(/\D/g, '').substring(0, 11);
+  if (v.length > 6) {
+    v = '(' + v.substring(0,2) + ') ' + v.substring(2,7) + '-' + v.substring(7);
+  } else if (v.length > 2) {
+    v = '(' + v.substring(0,2) + ') ' + v.substring(2);
+  } else if (v.length > 0) {
+    v = '(' + v;
+  }
+  this.value = v;
+});
+
+const campoCpf = document.getElementById('cpf');
+campoCpf.addEventListener('input', function () {
+  let v = this.value.replace(/\D/g, '').substring(0, 11);
+  if (v.length > 9) {
+    v = v.substring(0,3) + '.' + v.substring(3,6) + '.' + v.substring(6,9) + '-' + v.substring(9);
+  } else if (v.length > 6) {
+    v = v.substring(0,3) + '.' + v.substring(3,6) + '.' + v.substring(6);
+  } else if (v.length > 3) {
+    v = v.substring(0,3) + '.' + v.substring(3);
+  }
+  this.value = v;
+});
+
+// ── Validação de CPF ──────────────────────────────────────
+
+function validarCpf(cpf) {
+  const d = cpf.replace(/\D/g, '');
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) soma += parseInt(d[i]) * (10 - i);
+  let r = (soma * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  if (r !== parseInt(d[9])) return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) soma += parseInt(d[i]) * (11 - i);
+  r = (soma * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  return r === parseInt(d[10]);
+}
+
+function mascararCpf(cpf) {
+  const d = cpf.replace(/\D/g, '');
+  if (d.length === 11) return '***.' + d.substring(3,6) + '.' + d.substring(6,9) + '-**';
+  return cpf;
+}
+
+// ── Helpers de UI ────────────────────────────────────────
+
+function mostrarErro(id, visivel) {
+  const el = document.getElementById('erro-' + id);
+  const input = document.getElementById(id);
+  if (el) el.classList.toggle('visivel', visivel);
+  if (input) input.classList.toggle('erro', visivel);
+}
+
+function limparErros() {
+  ['nome','email','telefone','cpf'].forEach(function(id) { mostrarErro(id, false); });
+  const av = document.getElementById('aviso-form');
+  av.className = 'aviso';
+  av.textContent = '';
+}
+
+// ── Submissão do formulário ───────────────────────────────
+
+document.getElementById('form-cadastro').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  limparErros();
+
+  const nome     = document.getElementById('nome').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const telefone = document.getElementById('telefone').value.trim();
+  const cpf      = document.getElementById('cpf').value.trim();
+  const lgpd     = document.getElementById('lgpd').checked;
+
+  let valido = true;
+
+  if (!nome || nome.split(' ').filter(Boolean).length < 2) {
+    mostrarErro('nome', true); valido = false;
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    mostrarErro('email', true); valido = false;
+  }
+  if (!telefone || telefone.replace(/\D/g,'').length < 10) {
+    mostrarErro('telefone', true); valido = false;
+  }
+  if (!validarCpf(cpf)) {
+    mostrarErro('cpf', true); valido = false;
+  }
+
+  if (!lgpd) {
+    const av = document.getElementById('aviso-form');
+    av.textContent = 'Você precisa aceitar os termos da LGPD para participar.';
+    av.className   = 'aviso erro';
+    valido = false;
+  }
+
+  if (!valido) return;
+
+  // Verificar configuração
+  if (!GAS_URL || GAS_URL === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT') {
+    const av = document.getElementById('aviso-form');
+    av.textContent = '⚠️ A URL do Google Apps Script não foi configurada. Consulte o README.md.';
+    av.className   = 'aviso erro';
+    return;
+  }
+
+  // Loading
+  const btn = document.getElementById('btn-submit');
+  btn.disabled   = true;
+  btn.innerHTML  = '<span class="spinner"></span>Aguarde...';
+
+  try {
+    const payload = { nome, email, telefone, cpf };
+
+    // Content-Type text/plain evita preflight CORS no Apps Script
+    const resp = await fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify(payload),
+    });
+
+    const json = await resp.json();
+
+    if (!json.ok) {
+      throw new Error(json.mensagem || 'Erro desconhecido.');
+    }
+
+    // Sucesso
+    const agora = new Date().toLocaleDateString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+
+    dadosParticipante = { nome, email, cpf, token: json.token, data: agora };
+    exibirComprovante(dadosParticipante);
+
+  } catch (err) {
+    const av = document.getElementById('aviso-form');
+    av.textContent = 'Não foi possível concluir o cadastro. Verifique a conexão e tente novamente.';
+    av.className   = 'aviso erro';
+    console.error(err);
+  } finally {
+    btn.disabled  = false;
+    btn.innerHTML = 'Gerar meu token';
+  }
+});
+
+// ── Exibir comprovante ────────────────────────────────────
+
+function exibirComprovante(d) {
+  const cpfMask = mascararCpf(d.cpf);
+
+  // Tela de comprovante
+  document.getElementById('token-display').textContent = d.token;
+  document.getElementById('info-nome').textContent     = d.nome;
+  document.getElementById('info-cpf').textContent      = cpfMask;
+  document.getElementById('info-data').textContent     = d.data;
+
+  // Cupom de impressão
+  document.getElementById('cp-token').textContent = d.token;
+  document.getElementById('cp-nome').textContent  = d.nome;
+  document.getElementById('cp-cpf').textContent   = cpfMask;
+  document.getElementById('cp-data').textContent  = d.data;
+
+  // Troca de tela
+  document.getElementById('tela-formulario').style.display  = 'none';
+  document.getElementById('tela-comprovante').style.display = 'block';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Novo cadastro ─────────────────────────────────────────
+
+function novoCadastro() {
+  document.getElementById('form-cadastro').reset();
+  limparErros();
+  document.getElementById('tela-comprovante').style.display = 'none';
+  document.getElementById('tela-formulario').style.display  = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
