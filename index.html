@@ -70,7 +70,10 @@
     }
 
     /* Logo SENAI inline SVG */
-    .senai-logo { height: 36px; }
+    .senai-logo {
+      height: 36px;
+      filter: brightness(0) invert(1);
+    }
 
     .header-divider {
       width: 1px;
@@ -519,15 +522,7 @@
 ═══════════════════════════════════════════════════ -->
 <header class="header">
   <div class="logo-wrap">
-    <!-- Logo SENAI (SVG inline — substitua por <img src="assets/senai-logo.png"> se preferir) -->
-    <svg class="senai-logo" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" aria-label="SENAI">
-      <text x="0" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
-            font-size="30" fill="#ffffff" letter-spacing="1">SENA</text>
-      <text x="90" y="32" font-family="Arial Black, Arial, sans-serif" font-weight="900"
-            font-size="30" fill="#ffffff">i</text>
-      <!-- ponto laranja acima do i -->
-      <circle cx="96" cy="5" r="5" fill="#E8401C"/>
-    </svg>
+    <img src="assets/senai-logo.png" class="senai-logo" alt="SENAI" />
     <div class="header-divider"></div>
     <div style="text-align:left;">
       <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Curso ADS</div>
