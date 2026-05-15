@@ -70,16 +70,7 @@
     }
 
     /* Logo SENAI inline SVG */
-    .senai-logo {
-      display: flex; align-items: center; line-height: 1;
-      font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
-      font-weight: 900; font-size: 28px; color: #fff; letter-spacing: 1px;
-    }
-    .senai-i-wrap { position: relative; display: inline-block; }
-    .senai-dot {
-      position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
-      width: 9px; height: 9px; background: #E8401C; border-radius: 50%;
-    }
+    .senai-logo { height: 38px; filter: brightness(0) invert(1); }
 
     .header-divider {
       width: 1px;
@@ -528,7 +519,7 @@
 ═══════════════════════════════════════════════════ -->
 <header class="header">
   <div class="logo-wrap">
-    <div class="senai-logo" aria-label="SENAI">SENA<span class="senai-i-wrap"><span class="senai-dot"></span>i</span></div>
+    <img src="assets/senai-logo.png" class="senai-logo" alt="SENAI" />
     <div class="header-divider"></div>
     <div style="text-align:left;">
       <div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Curso ADS</div>
