@@ -1100,6 +1100,10 @@ async function enviarEmail() {
 // ── Qualificação ──────────────────────────────────────────
 
 function exibirQualificacao() {
+  const btnCont = document.getElementById('btn-continuar');
+  btnCont.disabled  = false;
+  btnCont.innerHTML = 'Continuar →';
+  document.getElementById('aviso-qual').className  = 'aviso';
   document.getElementById('tela-formulario').style.display   = 'none';
   document.getElementById('tela-qualificacao').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
