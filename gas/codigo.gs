@@ -34,7 +34,24 @@ function doPost(e) {
         lock.releaseLock();
         return resposta({ ok: false, mensagem: 'Dados insuficientes para envio.' });
       }
-      enviarEmail(nome, email, cpf, token);
+      try {
+        enviarEmail(nome, email, cpf, token);
+      } catch (errEmail) {
+        lock.releaseLock();
+        Logger.log('ERRO EMAIL: ' + errEmail.message);
+        const semPermissao = errEmail.message && (
+          errEmail.message.indexOf('Gmail') !== -1 ||
+          errEmail.message.indexOf('authorization') !== -1 ||
+          errEmail.message.indexOf('permission') !== -1 ||
+          errEmail.message.indexOf('scope') !== -1
+        );
+        return resposta({
+          ok: false,
+          mensagem: semPermissao
+            ? 'O script não tem permissão para enviar e-mails. Reautorize o Apps Script.'
+            : 'Falha ao enviar e-mail: ' + errEmail.message,
+        });
+      }
       lock.releaseLock();
       return resposta({ ok: true });
     }
