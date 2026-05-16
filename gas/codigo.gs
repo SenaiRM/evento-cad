@@ -54,6 +54,35 @@ function doPost(e) {
       return resposta({ ok: true, participantes: participantes });
     }
 
+    // Ação: salvar respostas de qualificação
+    if (dados.action === 'qualificacao') {
+      const { token, imovel, fazInvest, tipoInvest, querInfo, querAprender, planejaCom } = dados;
+      if (!token) {
+        lock.releaseLock();
+        return resposta({ ok: false, mensagem: 'Token ausente.' });
+      }
+      const aba  = obterOuCriarAba();
+      const rows = aba.getDataRange().getValues();
+      var linhaIdx = -1;
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][5]) === String(token)) { linhaIdx = i + 1; break; }
+      }
+      if (linhaIdx === -1) {
+        lock.releaseLock();
+        return resposta({ ok: false, mensagem: 'Token não encontrado.' });
+      }
+      aba.getRange(linhaIdx, 9, 1, 6).setValues([[
+        imovel       || '',
+        fazInvest    || '',
+        tipoInvest   || '',
+        querInfo     || '',
+        querAprender || '',
+        planejaCom   || '',
+      ]]);
+      lock.releaseLock();
+      return resposta({ ok: true });
+    }
+
     // Ação padrão: cadastro
     const { nome, email, telefone, cpf } = dados;
 
@@ -84,6 +113,7 @@ function doPost(e) {
       token,
       Utilities.formatDate(agora, 'America/Sao_Paulo', 'dd/MM/yyyy HH:mm:ss'),
       dados.ip || '',
+      '', '', '', '', '', '',   // colunas de qualificação (I–N)
     ]);
 
     lock.releaseLock();
@@ -108,10 +138,14 @@ function obterOuCriarAba() {
 
   if (!aba) {
     aba = ss.insertSheet(NOME_ABA);
-    aba.appendRow(['ID', 'Nome', 'E-mail', 'Telefone', 'CPF', 'Token', 'Data/Hora', 'IP']);
+    aba.appendRow([
+      'ID', 'Nome', 'E-mail', 'Telefone', 'CPF', 'Token', 'Data/Hora', 'IP',
+      'Imóvel Próprio', 'Faz Investimento', 'Tipo Investimento',
+      'Quer Info Empreendimentos', 'Quer Aprender Invest.', 'Planeja Comprar',
+    ]);
     aba.setFrozenRows(1);
 
-    const cabecalho = aba.getRange(1, 1, 1, 8);
+    const cabecalho = aba.getRange(1, 1, 1, 14);
     cabecalho.setBackground('#0B3C7A');
     cabecalho.setFontColor('#FFD100');
     cabecalho.setFontWeight('bold');
