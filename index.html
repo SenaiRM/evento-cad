@@ -1057,10 +1057,15 @@ async function enviarEmail() {
   btn.innerHTML = '<span class="spinner"></span>Enviando...';
   av.className  = 'aviso-email';
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
   try {
     const resp = await fetch(GAS_URL, {
-      method: 'POST',
-      body:   JSON.stringify({
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      signal:  controller.signal,
+      body:    JSON.stringify({
         action:   'email',
         nome:     dadosParticipante.nome,
         email:    dadosParticipante.email,
@@ -1068,6 +1073,7 @@ async function enviarEmail() {
         token:    dadosParticipante.token,
       }),
     });
+    clearTimeout(timeout);
 
     const json = await resp.json();
 
@@ -1080,7 +1086,10 @@ async function enviarEmail() {
       throw new Error(json.mensagem || 'Falha no envio.');
     }
   } catch (err) {
-    av.textContent = '❌ Não foi possível enviar. Tente novamente.';
+    clearTimeout(timeout);
+    av.textContent = err.name === 'AbortError'
+      ? '❌ Tempo esgotado. Verifique sua conexão e tente novamente.'
+      : '❌ Não foi possível enviar. Tente novamente.';
     av.className   = 'aviso-email err';
     btn.disabled   = false;
     btn.innerHTML  = '📧 Enviar token por e-mail';
