@@ -71,7 +71,7 @@
 
     /* Logo SENAI inline SVG */
     .senai-logo {
-      height: 60px;
+      height: 108px;
       background: #fff;
       border-radius: 4px;
       padding: 3px 6px;
@@ -449,21 +449,8 @@
       margin-top: 20px;
     }
 
-    .btn-pular {
-      flex: 1;
-      padding: 14px;
-      background: transparent;
-      color: var(--texto-soft);
-      font-size: 15px;
-      font-weight: 600;
-      border: 1.5px solid var(--cinza-borda);
-      border-radius: var(--raio-sm);
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
     .btn-continuar {
-      flex: 2;
+      flex: 1;
       padding: 14px;
       background: var(--amarelo);
       color: var(--azul-escuro);
@@ -1109,11 +1096,6 @@ function exibirQualificacao() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function pularQualificacao() {
-  document.getElementById('tela-qualificacao').style.display = 'none';
-  exibirComprovante(dadosParticipante);
-}
-
 async function enviarQualificacao() {
   const btn = document.getElementById('btn-continuar');
   const av  = document.getElementById('aviso-qual');
@@ -1129,10 +1111,14 @@ async function enviarQualificacao() {
   btn.innerHTML = '<span class="spinner"></span>Salvando...';
   av.className  = 'aviso';
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
   try {
     const resp = await fetch(GAS_URL, {
       method:  'POST',
       headers: { 'Content-Type': 'text/plain' },
+      signal:  controller.signal,
       body: JSON.stringify({
         action:       'qualificacao',
         token:        _tokenAtual,
@@ -1144,6 +1130,7 @@ async function enviarQualificacao() {
         planejaCom:   radioVal('q-planeja'),
       }),
     });
+    clearTimeout(timeout);
 
     const json = await resp.json();
     if (!json.ok) throw new Error(json.mensagem || 'Erro ao salvar.');
@@ -1152,7 +1139,10 @@ async function enviarQualificacao() {
     exibirComprovante(dadosParticipante);
 
   } catch (err) {
-    av.textContent = 'Não foi possível salvar. Você pode pular ou tentar novamente.';
+    clearTimeout(timeout);
+    av.textContent = err.name === 'AbortError'
+      ? 'Tempo esgotado. Verifique sua conexão e tente novamente.'
+      : 'Não foi possível salvar. Tente novamente.';
     av.className   = 'aviso erro';
     btn.disabled   = false;
     btn.innerHTML  = 'Continuar →';
